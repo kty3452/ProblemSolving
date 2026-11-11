@@ -11,17 +11,13 @@ int num[20];
 int min_num = INT_MAX;
 int total = 0;
 
-void backtracking(int start, int depth, int one_set, vector<bool>& used){
+void backtracking(int start, int depth, int one_set){
     if(depth == n){
         min_num = min(min_num, abs(total - (2 * one_set)));
         return;
     }
     for(int i = start;i < 2 * n;i++){
-        if(used[i] == false){
-            used[i] = true;
-            backtracking(i + 1, depth + 1, one_set + num[i], used);
-            used[i] = false;
-        }
+        backtracking(i + 1, depth + 1, one_set + num[i]);
     }
 }
 
@@ -32,9 +28,7 @@ int main() {
         total += num[i];
     }
 
-    vector<bool> used(2 * n, false);
-
-    backtracking(0, 0, 0, used);
+    backtracking(0, 0, 0);
 
     cout << min_num;
 
