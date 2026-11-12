@@ -11,7 +11,7 @@ int max_num = 0;
 
 void backtracking(int r){
     static vector<bool> visited(n, false);
-    static vector<int> num;
+    static vector<int> num(n, 0);
     if(r == n){
         max_num = max(max_num, *min_element(num.begin(), num.end()));
         return;
@@ -20,10 +20,9 @@ void backtracking(int r){
         if(visited[c]) continue;
         
         visited[c] = true;
-        num.push_back(grid[r][c]);
+        num[r] = grid[r][c];        
         backtracking(r + 1);
         visited[c] = false;
-        num.pop_back();
     }
 }
 
