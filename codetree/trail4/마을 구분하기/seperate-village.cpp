@@ -10,7 +10,7 @@ int total_person;
 vector<vector<bool>> visited;
 
 bool InRange(int r, int c){return r >= 0 && c >= 0 && r < n && c < n;}
-bool CanGo(int r, int c){return InRange(r, c) && !visited[r][c] && grid[r][c];}
+bool CanGo(int r, int c){return !visited[r][c] && grid[r][c];}
 
 void DFS(int r, int c){
     static int dr[4] = {0, 0, 1, -1};
@@ -19,7 +19,7 @@ void DFS(int r, int c){
         int nr = r + dr[i];
         int nc = c + dc[i];
 
-        if(CanGo(nr, nc)){
+        if(InRange(nr, nc) && CanGo(nr, nc)){
             visited[nr][nc] = true;
             total_person++;
             DFS(nr, nc);
@@ -43,7 +43,7 @@ int main() {
 
     for(int i = 0;i < n;i++){
         for(int j = 0;j < n;j++){
-            if(!visited[i][j] && grid[i][j]){
+            if(CanGo(i, j)){
                 visited[i][j] = true;
                 total_person = 1;
                 DFS(i, j);
