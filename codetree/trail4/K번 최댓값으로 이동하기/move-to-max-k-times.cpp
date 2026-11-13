@@ -27,7 +27,7 @@ vector<vector<Coordinate>> num;
 
 Coordinate CalNext(int r, int c){
     int start = grid[r][c] - 1;
-    for(int i = start;i >= 0;i--){
+    for(int i = start;i >= 1;i--){
         for(int j = 0;j < num[i].size();j++){
             auto [nr, nc] = num[i][j];
             if(visited[nr][nc]) return Coordinate{nr, nc};
