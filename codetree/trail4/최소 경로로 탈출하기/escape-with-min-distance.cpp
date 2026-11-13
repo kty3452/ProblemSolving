@@ -8,7 +8,7 @@ int n, m;
 int a[100][100];
 
 queue<pair<int, int>> q;
-vector<vector<int>> visited;
+int visited[100][100]{};
 
 void Push(int r, int c, int nr, int nc){
     visited[nr][nc] = visited[r][c] + 1;
@@ -49,7 +49,6 @@ int main() {
             cin >> a[i][j];
         }
     }
-    visited.resize(n, vector<int>(m, 0));
     visited[0][0] = 1;
     q.push({0, 0});
     BFS();
