@@ -26,7 +26,7 @@ queue<Coordinate> q;
 vector<vector<Coordinate>> num;
 
 Coordinate CalNext(int r, int c){
-    int start = grid[r][c] - 2;
+    int start = grid[r][c] - 1;
     for(int i = start;i >= 0;i--){
         for(int j = 0;j < num[i].size();j++){
             auto [nr, nc] = num[i][j];
@@ -73,11 +73,11 @@ void BFS(int start_r, int start_c){
 int main() {
     cin >> n >> k;
 
-    num.resize(100, vector<Coordinate>());
+    num.resize(101, vector<Coordinate>());
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             cin >> grid[i][j];
-            num[grid[i][j] - 1].push_back({i, j});
+            num[grid[i][j]].push_back({i, j});
         }
     }
 
