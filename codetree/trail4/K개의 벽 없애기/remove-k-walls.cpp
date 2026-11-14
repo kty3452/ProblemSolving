@@ -1,6 +1,7 @@
 /*
 23:18 시작
-
+23:40 완료
+23:46 3차원 visited 시작
 */
 
 #include <iostream>
@@ -10,6 +11,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstring>
+#include <tuple>
 
 using namespace std;
 
@@ -17,66 +19,50 @@ int n, k;
 int grid[100][100];
 int r1, c1, r2, c2;
 int min_num = INT_MAX;
-queue<pair<int ,int>> q;
-int visited[100][100]{};
-vector<pair<int, int>> wall;
+queue<tuple<int, int, int>> q;
+vector<vector<vector<int>>> visited;
 
-void Push(int r, int c, int nr, int nc){
-    visited[nr][nc] = visited[r][c] + 1;
-    q.push({nr, nc});
+void Push(int r, int c, int nr, int nc, int now_wall){
+    visited[nr][nc][now_wall - grid[nr][nc]] = visited[r][c][now_wall] + 1;
+    q.push({nr, nc, now_wall - grid[nr][nc]});
 }
 
 bool InRange(int r, int c){
     return r >= 0 && c >= 0 && r < n && c < n; 
 }
 
-bool CanGo(int r, int c){
-    return !visited[r][c] && !grid[r][c];
+
+bool CanGo(int r, int c, int now_wall){
+    return !visited[r][c][now_wall] && now_wall - grid[r][c] >= 0;
 }
+
 
 void BFS(){
     static int dr[4] = {0, 0, 1, -1};
     static int dc[4] = {1, -1, 0, 0};
 
     while(!q.empty()){
-        auto [r, c] = q.front();
+        auto [r, c, k] = q.front();
         q.pop();
 
         for(int i = 0;i < 4;i++){
             int nr = r + dr[i];
             int nc = c + dc[i];
-            if(InRange(nr, nc) && CanGo(nr, nc)){
-                Push(r, c, nr, nc);
+            if(InRange(nr, nc) && CanGo(nr, nc, k)){
+                Push(r, c, nr, nc, k);
             }
         }
     }
 
 }
 
-void Backtracking(int start, int depth, vector<pair<int, int>> v){
-    if(depth == k){
-        for(auto [r, c] : v) grid[r][c] = 0;
-        memset(visited, 0, sizeof(visited));
-        Push(r1, c1, r1, c1);
-        BFS();
-        if(visited[r2][c2]) min_num = min(min_num, visited[r2][c2]);
-        for(auto [r, c] : v) grid[r][c] = 1;
-        return;
-    }
-    for(int i = start;i < wall.size();i++){
-        v.push_back({wall[i]});
-        Backtracking(i + 1, depth + 1, v);
-        v.pop_back();
-    }
-}
-
 int main() {
     cin >> n >> k;
+    visited.resize(n, vector<vector<int>>(n, vector<int>(k + 1, 0)));
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             cin >> grid[i][j];
-            if(grid[i][j]) wall.push_back({i, j});
         }
     }
 
@@ -88,14 +74,18 @@ int main() {
     r2--;
     c2--;
 
-    vector<pair<int, int>> v;
-    Backtracking(0, 0, v);
+    visited[r1][c1][k] = 1;
+    q.push({r1, c1, k});
 
-    
-    if(min_num == INT_MAX) cout << - 1;
-    else cout << min_num - 1;
+    BFS();
 
-    // Please write your code here.
+    int min_num = INT_MAX;
+    for(int i = 0;i <= k;i++){
+        if(visited[r2][c2][i] != 0) min_num = min(visited[r2][c2][i] - 1, min_num);
+    }
+    if(min_num == INT_MAX) cout << -1;
+    else cout << min_num;
+
 
     return 0;
 }
