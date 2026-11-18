@@ -1,66 +1,82 @@
 #include <iostream>
-#include <vector>
-#include <utility>
 #include <algorithm>
 #include <climits>
 
+#define MAX_N 100
+#define MAX_R 100
+
 using namespace std;
 
+// 변수 선언
 int n;
-int grid[100][100];
+int num[MAX_N][MAX_N];
+int dp[MAX_N][MAX_N];
 
-int main() {
-    cin >> n;
+int ans = INT_MAX;
 
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            cin >> grid[i][j];
-        }
-    }
+void Initialize() {
+    // 전부 INT_MAX로 초기화합니다.
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            dp[i][j] = INT_MAX;
 
-    vector<vector<vector<pair<int, int>>>> dp(n, vector<vector<pair<int, int>>>(n, vector<pair<int, int>>(101, pair<int, int>(INT_MIN, INT_MAX))));
-    dp[0][0][grid[0][0]] = make_pair(grid[0][0], grid[0][0]);
+    // 시작점의 경우 dp[0][0] = num[0][0]으로 초기값을 설정해줍니다
+    dp[0][0] = num[0][0];
 
-    
-    for (int i = 1; i < n; i++) {
-        for(int j = 1;j <= 100;j++){
-            if(dp[0][i - 1][j].first != INT_MIN){
-                auto [lmax, lmin] = make_pair(max(dp[0][i - 1][j].first, grid[0][i]), min(dp[0][i - 1][j].second, grid[0][i]));
-                dp[0][i][lmin] = make_pair(lmax, lmin);
-            }
-            if(dp[i - 1][0][j].first != INT_MIN){
-                auto [umax, umin] = make_pair(max(dp[i - 1][0][j].first, grid[i][0]), min(dp[i - 1][0][j].second, grid[i][0]));
-                dp[i][0][umin] = make_pair(umax, umin);
-            }
-        }
-    }
-    
-    for (int i = 1; i < n; i++) {
-        for (int j = 1; j < n; j++) {
-            vector<pair<int, int>> v;
-            for(int k = 1;k <= 100;k++){
-                if(dp[i - 1][j][k].first != INT_MIN) v.push_back(make_pair(max(grid[i][j], dp[i - 1][j][k].first), min(grid[i][j], dp[i - 1][j][k].second)));
-                if(dp[i][j - 1][k].first != INT_MIN) v.push_back(make_pair(max(grid[i][j], dp[i][j - 1][k].first), min(grid[i][j], dp[i][j - 1][k].second)));
-            }
-            for(int k = 0;k < v.size();k++){
-                if(dp[i][j][v[k].second].first == INT_MIN){
-                    dp[i][j][v[k].second] = v[k];
-                }
-                else{
-                    dp[i][j][v[k].second].first = min(dp[i][j][v[k].second].first, v[k].first);
-                }
-            }
-        }
-    }
+    // 최좌측 열의 초기값을 설정해줍니다.
+    for(int i = 1; i < n; i++)
+        dp[i][0] = max(dp[i - 1][0], num[i][0]);
 
-    int min_num = INT_MAX;
-    for(int i = 1;i <= 100;i++){
-        if(dp[n - 1][n - 1][i].first != INT_MIN)
-            min_num = min(dp[n - 1][n - 1][i].first - dp[n - 1][n - 1][i].second, min_num);
-    }
-
-    cout << min_num;
-
-    return 0;
+    // 최상단 행의 초기값을 설정해줍니다.
+    for(int j = 1; j < n; j++)
+        dp[0][j] = max(dp[0][j - 1], num[0][j]);
 }
 
+int Solve(int lower_bound) {
+    // lower_bound 미만의 값은 사용할 수 없도록
+    // num값을 변경해줍니다.
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            if(num[i][j] < lower_bound)
+                num[i][j] = INT_MAX;
+
+    // DP 초기값 설정
+    Initialize();
+
+    // 탐색하는 위치의 위에 값과 좌측 값 중에 작은 값과
+    // 해당 위치의 숫자 중에 최댓값을 구해줍니다.
+    for(int i = 1; i < n; i++)
+        for(int j = 1; j < n; j++)
+            dp[i][j] = max(min(dp[i - 1][j], dp[i][j - 1]), num[i][j]);
+
+    return dp[n - 1][n - 1];
+}
+
+int main() {
+    // 입력
+    cin >> n;
+
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            cin >> num[i][j];
+
+    // 최솟값을 lower_bound라고 가정했을 때
+    // lower_bound 이상의 수들만 사용하여
+    // 이동한다는 조건하에서
+    // 최댓값을 최소로 만드는 DP 문제를 풀어줍니다.
+    for(int lower_bound = 1; lower_bound <= MAX_R; lower_bound++) {
+        int upper_bound = Solve(lower_bound);
+
+        // 다 진행했음에도 여전히 INT_MAX라면
+        // 그러한 이동이 불가능하다는 뜻이므로
+        // 패스합니다.
+        if(upper_bound == INT_MAX)
+            continue;
+
+        // 답을 갱신합니다.
+        ans = min(ans, upper_bound - lower_bound);
+    }
+
+    cout << ans << "\n";
+    return 0;
+}
