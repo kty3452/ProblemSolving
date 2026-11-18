@@ -1,82 +1,74 @@
 #include <iostream>
+#include <bitset>
+#include <vector>
 #include <algorithm>
-#include <climits>
-
-#define MAX_N 100
-#define MAX_R 100
 
 using namespace std;
 
-// 변수 선언
+#define MIN_N 0
+#define MAX_N 100
+
 int n;
-int num[MAX_N][MAX_N];
-int dp[MAX_N][MAX_N];
+int grid[100][100];
+vector<vector<bitset<101>>> v;
+int answer = 0;
 
-int ans = INT_MAX;
+void Init(int gap){
+    v.assign(n, vector<bitset<101>>(n, bitset<101>(0)));
+    
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            for(int k = max(grid[i][j] - gap, 1);k <= grid[i][j];k++){
+                v[i][j][k] = 1;
+            }
+        }
+    }
 
-void Initialize() {
-    // 전부 INT_MAX로 초기화합니다.
-    for(int i = 0; i < n; i++)
-        for(int j = 0; j < n; j++)
-            dp[i][j] = INT_MAX;
 
-    // 시작점의 경우 dp[0][0] = num[0][0]으로 초기값을 설정해줍니다
-    dp[0][0] = num[0][0];
+    for(int i = 1;i < n;i++){
+        v[i][0] = v[i - 1][0] & v[i][0];
+        v[0][i] = v[0][i - 1] & v[0][i];
+    }
 
-    // 최좌측 열의 초기값을 설정해줍니다.
-    for(int i = 1; i < n; i++)
-        dp[i][0] = max(dp[i - 1][0], num[i][0]);
-
-    // 최상단 행의 초기값을 설정해줍니다.
-    for(int j = 1; j < n; j++)
-        dp[0][j] = max(dp[0][j - 1], num[0][j]);
 }
 
-int Solve(int lower_bound) {
-    // lower_bound 미만의 값은 사용할 수 없도록
-    // num값을 변경해줍니다.
-    for(int i = 0; i < n; i++)
-        for(int j = 0; j < n; j++)
-            if(num[i][j] < lower_bound)
-                num[i][j] = INT_MAX;
 
-    // DP 초기값 설정
-    Initialize();
 
-    // 탐색하는 위치의 위에 값과 좌측 값 중에 작은 값과
-    // 해당 위치의 숫자 중에 최댓값을 구해줍니다.
-    for(int i = 1; i < n; i++)
-        for(int j = 1; j < n; j++)
-            dp[i][j] = max(min(dp[i - 1][j], dp[i][j - 1]), num[i][j]);
+bool CalBit(int gap){
+    Init(gap);
 
-    return dp[n - 1][n - 1];
+    for(int i = 1;i < n;i++){
+        for(int j = 1;j < n;j++){
+            v[i][j] = (v[i - 1][j] | v[i][j - 1]) & v[i][j];
+        }
+    }
+    return v[n - 1][n - 1].any();
+}
+
+void ParametricSearch(int left, int right){
+    if(left > right) return;
+    int mid = (left + right) / 2;
+    bool able = CalBit(mid);
+    if(able) {
+        answer = mid;
+        ParametricSearch(left, mid - 1);
+    }
+    else ParametricSearch(mid + 1, right);
 }
 
 int main() {
-    // 입력
     cin >> n;
 
-    for(int i = 0; i < n; i++)
-        for(int j = 0; j < n; j++)
-            cin >> num[i][j];
-
-    // 최솟값을 lower_bound라고 가정했을 때
-    // lower_bound 이상의 수들만 사용하여
-    // 이동한다는 조건하에서
-    // 최댓값을 최소로 만드는 DP 문제를 풀어줍니다.
-    for(int lower_bound = 1; lower_bound <= MAX_R; lower_bound++) {
-        int upper_bound = Solve(lower_bound);
-
-        // 다 진행했음에도 여전히 INT_MAX라면
-        // 그러한 이동이 불가능하다는 뜻이므로
-        // 패스합니다.
-        if(upper_bound == INT_MAX)
-            continue;
-
-        // 답을 갱신합니다.
-        ans = min(ans, upper_bound - lower_bound);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cin >> grid[i][j];
+        }
     }
+    v.resize(n, vector<bitset<101>>(n, bitset<101>(0)));
 
-    cout << ans << "\n";
+    ParametricSearch(MIN_N, MAX_N);
+
+    cout << answer;
+
     return 0;
 }
