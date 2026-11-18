@@ -14,13 +14,27 @@ vector<vector<bitset<101>>> v;
 int answer = 0;
 
 void Init(int gap){
-    v.assign(n, vector<bitset<101>>(n, bitset<101>(0)));
+    // v.assign(n, vector<bitset<101>>(n, bitset<101>(0)));
     
+    // for (int i = 0; i < n; i++) {
+    //     for (int j = 0; j < n; j++) {
+    //         for(int k = max(grid[i][j] - gap, 1);k <= grid[i][j];k++){
+    //             v[i][j][k] = 1;
+    //         }
+    //     }
+    // }
+
+    bitset<101> allowed[101];
+
+    for (int value = 1; value <= 100; value++) {
+        for (int k = max(1, value - gap); k <= value; k++) {
+            allowed[value].set(k);
+        }
+    }
+
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            for(int k = max(grid[i][j] - gap, 1);k <= grid[i][j];k++){
-                v[i][j][k] = 1;
-            }
+            v[i][j] = allowed[grid[i][j]];
         }
     }
 
