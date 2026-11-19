@@ -20,7 +20,7 @@ int BFS(){
             int next = cur + coin[i];
             if(next >= 0 && next <= M && dp[next] == INT_MAX){
                 q.push(next);
-                dp[next] = min(dp[next], dp[cur] + 1);
+                dp[next] = dp[cur] + 1;
             }
         }
     }
