@@ -31,6 +31,8 @@ bool compare(vector<int> a, vector<int> b){
 }
 
 int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
     int n;
     cin >> n;
     vector<vector<int>> date(n, vector<int>(4, 0));
